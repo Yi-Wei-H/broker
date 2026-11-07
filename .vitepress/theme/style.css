@@ -1,0 +1,414 @@
+/* ===== 中文字体栈：各平台系统字体回退 ===== */
+:root {
+  --vp-font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue',
+    Arial, sans-serif;
+}
+
+/* ===== 品牌色：JavaGuide 风格的蓝 ===== */
+:root {
+  --vp-c-brand: #3b82f6;
+  --vp-c-brand-1: #2563d9;
+  --vp-c-brand-2: #3b82f6;
+  --vp-c-brand-3: #1c54c0;
+  --vp-c-brand-soft: rgba(59, 130, 246, 0.14);
+}
+
+.dark {
+  --vp-c-brand: #58a6ff;
+  --vp-c-brand-1: #7cb0ff;
+  --vp-c-brand-2: #58a6ff;
+  --vp-c-brand-3: #3d7ee8;
+  --vp-c-brand-soft: rgba(88, 166, 255, 0.16);
+}
+
+/* ===== 纸感浅色主题：三个面拉开明确色阶 =====
+   内容区(纸底+网格) #faf9f5 → 顶栏 #f3f1e9 → 左侧栏 #edebe1（最深）
+   用 :root:not(.dark) 而不是 :root，避免压过主题的 .dark 变量 */
+:root:not(.dark) {
+  --vp-c-bg: #faf9f5; /* 纸底（内容区） */
+  --vp-c-bg-alt: #f3f1e9; /* 次级面：代码块等 */
+  --vp-c-bg-soft: #f1efe6; /* 卡片底 */
+  --vp-c-bg-elv: #faf9f5;
+  --vp-c-divider: #d3cebb; /* 分隔线：在纸底上清晰可见（分区主要靠线+阴影，不是底色） */
+  --vp-code-bg-color: rgba(92, 85, 61, 0.13); /* 行内代码底色 */
+  --vp-nav-bg-color: rgba(243, 241, 233, 0.86); /* 顶栏：半透明，配合毛玻璃 */
+  --vp-sidebar-bg-color: rgba(237, 235, 225, 0.92); /* 侧栏：最深一档，半透明 */
+}
+
+/* 区块边界的投影色（明暗两套，强度对标 javaguide.cn） */
+:root {
+  --paper-edge: rgba(92, 85, 61, 0.18);
+}
+
+.dark {
+  --paper-edge: rgba(0, 0, 0, 0.4);
+}
+
+/* 页脚上边线：不用投影，用更深的实线区分 */
+:root:not(.dark) {
+  --footer-line: #c8c2ab;
+}
+
+.dark {
+  --footer-line: #4b4b53;
+}
+
+/* ===== 笔记本式细网格背景 ===== */
+:root {
+  --grid-line: rgba(92, 85, 61, 0.08);
+}
+
+.dark {
+  --grid-line: rgba(255, 255, 255, 0.05);
+}
+
+body {
+  background-image: linear-gradient(
+      to right,
+      var(--grid-line) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 22px 22px;
+  /* 格子锚定视口：fixed 侧栏/页脚透明时，网格不会在其后滑动 */
+  background-attachment: fixed;
+}
+
+/* ===== 代码块从纸底里凸显出来 ===== */
+.vp-doc div[class*='language-'] {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  box-shadow: 0 2px 6px var(--paper-edge);
+}
+
+/* ============================================================
+   顶栏 / 侧栏结构（覆盖默认主题的 scoped 样式）
+   默认主题在带侧栏页面：站名绝对定位叠在侧栏上方、顶栏透明、
+   侧栏顶到屏幕上沿 —— 全部反转：顶栏是网页层面的整条，侧栏在其下。
+   注意：主题组件样式带 [data-v-*] 作用域属性，实际优先级高一级，
+   这里的覆盖都加 .Layout 前缀并靠更晚加载取胜，不能省略前缀。
+   ============================================================ */
+
+/* 顶栏：加粗下边界线 + 投影；毛玻璃底色保留 */
+.Layout .VPNavBar:not(.home.top) {
+  border-bottom: 2px solid var(--vp-c-divider);
+  box-shadow: 0 2px 8px var(--paper-edge);
+  -webkit-backdrop-filter: saturate(150%) blur(12px);
+  backdrop-filter: saturate(150%) blur(12px);
+}
+
+/* 主题自带的 1px 滚动渐现线与加粗线重叠，隐藏掉 */
+.Layout .VPNavBar .divider {
+  display: none;
+}
+
+@media (min-width: 960px) {
+  /* 带侧栏页面顶栏默认透明，改为整条实底（下边界线由上面的全局规则统一提供） */
+  .Layout .VPNavBar.has-sidebar {
+    background-color: var(--vp-nav-bg-color);
+  }
+
+  /* 站名从"侧栏宽度内绝对定位"恢复为顶栏普通流式元素 */
+  .Layout .VPNavBar.has-sidebar .title {
+    position: static;
+    width: auto;
+    padding: 0;
+  }
+
+  /* 顶栏恢复常规留白与居中容器（默认主题在带侧栏页面清零了它们） */
+  .Layout .VPNavBar.has-sidebar .wrapper {
+    padding: 0 32px;
+  }
+
+  .Layout .VPNavBar.has-sidebar .container {
+    max-width: calc(var(--vp-layout-max-width) - 64px);
+  }
+
+  .Layout .VPNavBar.has-sidebar .content {
+    position: static;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  /* content-body 的 relative + 自带底色是配合旧布局的，一并还原 */
+  .Layout .VPNavBar .container .content-body {
+    position: static;
+    background-color: transparent;
+  }
+
+  /* 分类导航脱离文档流，相对整条顶栏水平居中 */
+  .Layout .VPNavBar .menu {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  /* menu 移走后，它旁边的分隔线不再适用 */
+  .Layout .VPNavBar .menu + .appearance::before {
+    display: none;
+  }
+}
+
+@media (min-width: 1440px) {
+  .Layout .VPNavBar.has-sidebar .title {
+    padding-left: 0;
+    width: auto;
+  }
+
+  .Layout .VPNavBar.has-sidebar .content {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+/* ===== 左侧栏：从顶栏下沿开始，只要一条加粗右边界线 ===== */
+@media (min-width: 960px) {
+  .Layout .VPSidebar {
+    top: calc(var(--vp-layout-top-height, 0px) + var(--vp-nav-height));
+    padding-top: 24px;
+    background-color: transparent; /* 露出全局格子（移动端抽屉仍用实底） */
+    border-right: 3px solid var(--vp-c-divider);
+  }
+
+  /* 默认主题用它遮"侧栏在顶栏后面的部分"，顶栏改为整条后不再需要 */
+  .Layout .VPSidebar .curtain {
+    display: none;
+  }
+}
+
+/* ===== 桌面端侧栏收起（按钮见 SidebarToggle.vue，状态 class 挂在 <html>） ===== */
+@media (min-width: 960px) {
+  /* 内容区左移与侧栏收起同步（侧栏自带 transform 0.25s ease 过渡） */
+  .Layout .VPContent.has-sidebar {
+    transition: padding-left 0.25s ease;
+  }
+
+  html.sb-collapsed .Layout .VPSidebar {
+    transform: translateX(-100%);
+  }
+
+  html.sb-collapsed .Layout .VPContent.has-sidebar {
+    padding-left: 0;
+  }
+}
+
+/* 一级分类之间不用横线分隔（紧凑间距） */
+.Layout .VPSidebar .group + .group {
+  border-top: none;
+  padding-top: 1px;
+}
+
+/* ===== 右侧大纲栏：只要一条加粗左分界线（顶部渐变淡入，不与顶栏生硬相接） ===== */
+@media (min-width: 1280px) {
+  .Layout .VPDocAside {
+    padding-left: 16px;
+    border-left: 3px solid var(--vp-c-divider);
+    border-image: linear-gradient(
+        to bottom,
+        transparent 0,
+        var(--vp-c-divider) 96px
+      )
+      1;
+  }
+}
+
+/* ===== 页脚：只要一条加粗上分界线 ===== */
+.Layout .VPFooter {
+  background-color: transparent;
+  border-top: 2px solid var(--footer-line);
+}
+
+/* ===== 分类导航图标（currentColor 上色，跟随激活态） =====
+   两枚 SVG 内联成变量：顶栏菜单与手机抽屉菜单共用，换图标只改这里 */
+:root {
+  --icon-notes: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z'/%3E%3Cpath d='M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z'/%3E%3C/svg%3E");
+  --icon-star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z'/%3E%3C/svg%3E");
+  --icon-articles: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/%3E%3Cpath d='M14 2v6h6'/%3E%3Cpath d='M16 13H8'/%3E%3Cpath d='M16 17H8'/%3E%3C/svg%3E");
+}
+
+.VPNavBarMenuLink[href^='/notes/'] > span::before,
+.VPNavScreenMenuLink[href^='/notes/']::before {
+  content: '';
+  display: inline-block;
+  background-color: currentColor;
+  -webkit-mask: var(--icon-notes) no-repeat center / contain;
+  mask: var(--icon-notes) no-repeat center / contain;
+}
+
+.VPNavBarMenuLink[href^='/articles/'] > span::before,
+.VPNavScreenMenuLink[href^='/articles/']::before {
+  content: '';
+  display: inline-block;
+  background-color: currentColor;
+  -webkit-mask: var(--icon-articles) no-repeat center / contain;
+  mask: var(--icon-articles) no-repeat center / contain;
+}
+
+.VPNavBarMenuLink[href^='/starWeb/'] > span::before,
+.VPNavScreenMenuLink[href^='/starWeb/']::before {
+  content: '';
+  display: inline-block;
+  background-color: currentColor;
+  -webkit-mask: var(--icon-star) no-repeat center / contain;
+  mask: var(--icon-star) no-repeat center / contain;
+}
+
+/* 顶栏与手机抽屉的尺寸差异 */
+.VPNavBarMenuLink > span::before {
+  width: 15px;
+  height: 15px;
+  margin-right: 7px;
+  vertical-align: -2px;
+}
+
+.VPNavScreenMenuLink::before {
+  width: 16px;
+  height: 16px;
+  margin-right: 10px;
+  vertical-align: -3px;
+}
+
+/* ===== 文章页：注入的大标题 + 分隔线（markdown 层注入，与正文同列） ===== */
+.vp-doc h1.page-title {
+  margin: 12px 0 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--vp-c-divider);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.5px;
+  color: var(--vp-c-text-1);
+}
+
+/* 笔记页原样展示：第一个 h2 不带主题强加的顶部分隔线（后续小节的保留） */
+.notes-page .vp-doc h2:first-of-type {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 24px;
+}
+
+/* 手机端收紧标题尺寸（PC 不受影响） */
+@media (max-width: 767px) {
+  .vp-doc h1.page-title {
+    margin: 8px 0 16px;
+    padding-bottom: 12px;
+    font-size: 24px;
+  }
+}
+
+/* ===== 文章页：标题分隔线下方的「作者 · 创建 · 更新」行（markdown 层注入） ===== */
+.vp-doc p.article-meta {
+  margin: -10px 0 24px;
+  font-size: 13px;
+  color: var(--vp-c-text-2);
+}
+
+/* ===== 主题切换圆形扩散/收缩动画（View Transitions，配合 theme-transition.ts） ===== */
+/* 圆心/半径由 JS 在点击时写入 --vt-x/--vt-y/--vt-r；
+   动画必须由 keyframes 驱动——伪元素建立的第一帧就带起始 clip-path。
+   若等 transition.ready 再由 JS 补挂动画，晚一帧就是置顶暗层未裁剪的
+   整屏闪现（「先全黑，再放动画」） */
+@keyframes vt-reveal {
+  from {
+    clip-path: circle(0px at var(--vt-x) var(--vt-y));
+  }
+  to {
+    clip-path: circle(var(--vt-r) at var(--vt-x) var(--vt-y));
+  }
+}
+
+@keyframes vt-hide {
+  from {
+    clip-path: circle(var(--vt-r) at var(--vt-x) var(--vt-y));
+  }
+  to {
+    clip-path: circle(0px at var(--vt-x) var(--vt-y));
+  }
+}
+
+/* 去掉默认的交叉淡入与 group 级动画，交给 clip-path 圆形动画全权控制；
+   group/image-pair 一并关掉，避免与 clip 动画收尾时点不同步造成末帧跳动 */
+::view-transition-old(root),
+::view-transition-new(root),
+::view-transition-group(root),
+::view-transition-image-pair(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* 亮→暗：切换瞬间 html 带 .dark，暗色（新画面）在上层向外扩散 */
+html.dark::view-transition-new(root) {
+  z-index: 9999;
+  animation: vt-reveal 0.5s ease-in-out forwards;
+}
+
+/* 暗→亮：切换瞬间 html 无 .dark，暗色（旧画面）在上层向按钮中心收缩 */
+html:not(.dark)::view-transition-old(root) {
+  z-index: 9999;
+  animation: vt-hide 0.5s ease-in-out forwards;
+}
+
+/* ===== 文章内容列稍加宽（默认 688px → 760px） ===== */
+.VPDoc .content-container {
+  max-width: 760px;
+}
+
+/* ===== 文章页（无左栏的文档页）：内容列与大纲栏跟笔记页完全同位 =====
+   笔记页的几何 = VPContent 左内边距（侧栏宽，≥1440 再加 (100vw−1440)/2）
+   + 右内边距 (100vw−1440)/2。无左栏的文档页没有这套内边距，且容器被主题
+   限宽 992/1104 居中——大纲栏悬在半空、比笔记页离右缘远一截。
+   在 VPDoc 上复刻同一套内边距（VPPage 布局无 VPDoc，列表页不受影响），
+   并撤销限宽，让文章页像"侧栏隐身"的笔记页 */
+@media (min-width: 960px) {
+  .Layout .VPDoc:not(.has-sidebar) {
+    padding-left: calc(var(--vp-sidebar-width) + 32px);
+  }
+
+  .Layout .VPDoc:not(.has-sidebar) .container,
+  .Layout .VPDoc:not(.has-sidebar) .content {
+    max-width: none;
+  }
+}
+
+@media (min-width: 1440px) {
+  .Layout .VPDoc:not(.has-sidebar) {
+    padding-left: calc(
+      (100vw - var(--vp-layout-max-width)) / 2 + var(--vp-sidebar-width) + 32px
+    );
+    padding-right: calc((100vw - var(--vp-layout-max-width)) / 2 + 32px);
+  }
+}
+
+/* ===== 无侧栏宽页面（layout: page：收藏页、文章列表页）=====
+   VPPage 是裸容器：没有 VPDoc 的 container/内边距/居中几何（此前改 .content-container
+   是无效的——该元素在 page 布局里不存在）。这里手动补齐：VPPage 提供内边距，
+   页面根元素自行限宽居中 */
+.Layout.wide-page .VPPage {
+  padding: 8px 24px 96px;
+}
+
+/* 手机端更窄的页边距 */
+@media (max-width: 767px) {
+  .Layout.wide-page .VPPage {
+    padding: 8px 16px 72px;
+  }
+}
+
+@media (min-width: 960px) {
+  .Layout.wide-page .VPPage {
+    padding: 8px 32px 96px;
+  }
+
+  .Layout.wide-page .starweb {
+    max-width: 920px;
+    margin: 0 auto;
+  }
+
+  /* 文章列表是阅读型页面，收窄一些 */
+  .Layout.wide-page .articles {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+}
